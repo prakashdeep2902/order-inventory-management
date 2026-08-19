@@ -1,0 +1,14 @@
+# Order & Inventory Management API
+
+Backend API for user authentication, product and inventory management,
+and customer order processing.
+
+## Tech Stack
+
+- Node.js
+- TypeScript
+- Express.js
+- PostgreSQL
+- Prisma ORM
+- JWT
+- bcrypt
