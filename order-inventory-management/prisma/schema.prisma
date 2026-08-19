@@ -1,13 +1,73 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CANCELLED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+
+  orders Order[]
+
+  @@index([email])
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  stock     Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  orderItems OrderItem[]
+
+  @@index([active])
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  userId         Int
+  totalPrice     Decimal     @db.Decimal(10, 2)
+  status         OrderStatus @default(PENDING)
+  idempotencyKey String
+  createdAt      DateTime    @default(now())
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
