@@ -1,6 +1,6 @@
 import express from "express";
 import authRoutes from "./routes/auth.routes";
-import testRoutes from "./routes/test.routes";
+import productRoutes from "./routes/product.routes";
 
 const app = express();
 
@@ -13,6 +13,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/test", testRoutes);
+app.use("/api/products", productRoutes);
 
 export default app;
