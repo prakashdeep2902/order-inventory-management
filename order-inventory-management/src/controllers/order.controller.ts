@@ -1,6 +1,11 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth.middleware";
-import { createOrder } from "../services/order.service";
+import {
+  createOrder,
+  getMyOrders,
+  getMyOrderById,
+  getAllOrders,
+} from "../services/order.service";
 
 export const create = async (req: AuthRequest, res: Response) => {
   try {
@@ -90,5 +95,89 @@ export const create = async (req: AuthRequest, res: Response) => {
           message: "Internal server error",
         });
     }
+  }
+};
+
+export const getMine = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const orders = await getMyOrders(req.user.userId);
+
+    return res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getMineById = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const orderId = Number(req.params.id);
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    const order = await getMyOrderById(req.user.userId, orderId);
+
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error: any) {
+    if (error.message === "ORDER_NOT_FOUND") {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getAll = async (req: AuthRequest, res: Response) => {
+  try {
+    const orders = await getAllOrders();
+
+    return res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
